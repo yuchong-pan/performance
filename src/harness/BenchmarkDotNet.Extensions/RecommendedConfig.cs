@@ -13,6 +13,15 @@ namespace BenchmarkDotNet.Extensions
 {
     public static class RecommendedConfig
     {
+        private const string COMPlusPrefix                           = "COMPlus_";
+        private const string Interpret                               = COMPlusPrefix + "Interpret";
+        private const string InterpreterJITThreshold                 = COMPlusPrefix + "InterpreterJITThreshold";
+        private const string TC_CallCountThreshold                   = COMPlusPrefix + "TC_CallCountThreshold";
+        private const string TieredCompilation                       = COMPlusPrefix + "TieredCompilation";
+        private const string InterpreterHWIntrinsicsIsSupportedFalse = COMPlusPrefix + "InterpreterHWIntrinsicsIsSupportedFalse";
+        private const string InterpreterDoLoopMethods                = COMPlusPrefix + "InterpreterDoLoopMethods";
+        private const string InterpreterPrintPostMortem              = COMPlusPrefix + "InterpreterPrintPostMortem";
+
         public static IConfig Create(
             DirectoryInfo artifactsPath,
             ImmutableHashSet<string> mandatoryCategories,
@@ -21,7 +30,8 @@ namespace BenchmarkDotNet.Extensions
             List<string> exclusionFilterValue = null,
             List<string> categoryExclusionFilterValue = null,
             Job job = null,
-            bool getDiffableDisasm = false)
+            bool getDiffableDisasm = false,
+            bool testInterp = false)
         {
             if (job is null)
             {
@@ -29,15 +39,34 @@ namespace BenchmarkDotNet.Extensions
                     .WithWarmupCount(1) // 1 warmup is enough for our purpose
                     .WithIterationTime(TimeInterval.FromMilliseconds(250)) // the default is 0.5s per iteration, which is slighlty too much for us
                     .WithMinIterationCount(15)
-                    .WithMaxIterationCount(20) // we don't want to run more that 20 iterations
+                    .WithMaxIterationCount(20) // we don't want to run more than 20 iterations
                     .DontEnforcePowerPlan(); // make sure BDN does not try to enforce High Performance power plan on Windows
 
                 // See https://github.com/dotnet/roslyn/issues/42393
                 job = job.WithArguments(new Argument[] { new MsBuildArgument("/p:DebugType=portable") });
             }
+            
+            if (testInterp)
+            {
+                job = job
+                .WithEnvironmentVariables(
+                    new EnvironmentVariable(Interpret, "*"),
+                    new EnvironmentVariable(InterpreterJITThreshold, "0"),
+                    new EnvironmentVariable(TC_CallCountThreshold, "0"),
+                    new EnvironmentVariable(TieredCompilation, "1"),
+                    new EnvironmentVariable(InterpreterHWIntrinsicsIsSupportedFalse, "1"),
+                    new EnvironmentVariable(InterpreterDoLoopMethods, "1"),
+                    new EnvironmentVariable(InterpreterPrintPostMortem, "1")
+                )
+                .WithId("Interpreter Tiered Compilation");
+            }
+            else
+            {
+                job = job.WithId("Default");
+            }
 
             var config = DefaultConfig.Instance
-                .AddJob(job.AsDefault()) // tell BDN that this are our default settings
+                .AddJob(job.AsDefault()) // tell BDN that this is our default settings
                 .WithArtifactsPath(artifactsPath.FullName)
                 .AddDiagnoser(MemoryDiagnoser.Default) // MemoryDiagnoser is enabled by default
                 .AddFilter(new OperatingSystemFilter())
