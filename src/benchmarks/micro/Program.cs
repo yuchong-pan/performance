@@ -23,6 +23,7 @@ namespace MicroBenchmarks
             bool getDiffableDisasm;
             bool interpTc;
             bool jitMinOpts;
+            bool interpOnly;
 
             // Parse and remove any additional parameters that we need that aren't part of BDN
             try {
@@ -33,6 +34,12 @@ namespace MicroBenchmarks
                 CommandLineOptions.ParseAndRemoveBooleanParameter(argsList, "--disasm-diff", out getDiffableDisasm);
                 CommandLineOptions.ParseAndRemoveBooleanParameter(argsList, "--interp-tc", out interpTc);
                 CommandLineOptions.ParseAndRemoveBooleanParameter(argsList, "--jit-min-opts", out jitMinOpts);
+                CommandLineOptions.ParseAndRemoveBooleanParameter(argsList, "--interp-only", out interpOnly);
+
+                if (Convert.ToInt32(interpTc) + Convert.ToInt32(jitMinOpts) + Convert.ToInt32(interpOnly) > 1)
+                {
+                    throw new ArgumentException("Specify one of --interp-tc, --jit-min-opts, and --interp-only.");
+                }
 
                 CommandLineOptions.ValidatePartitionParameters(partitionCount, partitionIndex);
             }
@@ -53,7 +60,8 @@ namespace MicroBenchmarks
                     categoryExclusionFilterValue: categoryExclusionFilterValue,
                     getDiffableDisasm: getDiffableDisasm,
                     interpTc: interpTc,
-                    jitMinOpts: jitMinOpts))
+                    jitMinOpts: jitMinOpts,
+                    interpOnly: interpOnly))
                 .ToExitCode();
         }
     }

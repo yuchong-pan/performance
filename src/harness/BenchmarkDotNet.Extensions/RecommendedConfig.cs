@@ -22,6 +22,7 @@ namespace BenchmarkDotNet.Extensions
         private const string InterpreterDoLoopMethods                = COMPlusPrefix + "InterpreterDoLoopMethods";
         private const string InterpreterPrintPostMortem              = COMPlusPrefix + "InterpreterPrintPostMortem";
         private const string JitMinOpts                              = COMPlusPrefix + "JitMinOpts";
+        private const string ForceInterpreter                        = COMPlusPrefix + "ForceInterpreter";
 
         public static IConfig Create(
             DirectoryInfo artifactsPath,
@@ -33,7 +34,8 @@ namespace BenchmarkDotNet.Extensions
             Job job = null,
             bool getDiffableDisasm = false,
             bool interpTc = false,
-            bool jitMinOpts = false)
+            bool jitMinOpts = false,
+            bool interpOnly = false)
         {
             if (job is null)
             {
@@ -69,6 +71,21 @@ namespace BenchmarkDotNet.Extensions
                     new EnvironmentVariable(JitMinOpts, "1")
                 )
                 .WithId("JIT Min Opts");
+            }
+            else if (interpOnly)
+            {
+                job = job
+                .WithEnvironmentVariables(
+                    new EnvironmentVariable(Interpret, "*"),
+                    new EnvironmentVariable(InterpreterJITThreshold, "9999999"),
+                    new EnvironmentVariable(TC_CallCountThreshold, "9999999"),
+                    new EnvironmentVariable(TieredCompilation, "0"),
+                    new EnvironmentVariable(InterpreterHWIntrinsicsIsSupportedFalse, "1"),
+                    new EnvironmentVariable(InterpreterDoLoopMethods, "1"),
+                    new EnvironmentVariable(InterpreterPrintPostMortem, "1"),
+                    new EnvironmentVariable(ForceInterpreter, "1")
+                )
+                .WithId("Interpreter Only");
             }
             else
             {
