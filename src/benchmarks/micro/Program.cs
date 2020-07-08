@@ -21,7 +21,8 @@ namespace MicroBenchmarks
             List<string> exclusionFilterValue;
             List<string> categoryExclusionFilterValue;
             bool getDiffableDisasm;
-            bool testInterp;
+            bool interpTc;
+            bool jitMinOpts;
 
             // Parse and remove any additional parameters that we need that aren't part of BDN
             try {
@@ -30,7 +31,8 @@ namespace MicroBenchmarks
                 argsList = CommandLineOptions.ParseAndRemoveStringsParameter(argsList, "--exclusion-filter", out exclusionFilterValue);
                 argsList = CommandLineOptions.ParseAndRemoveStringsParameter(argsList, "--category-exclusion-filter", out categoryExclusionFilterValue);
                 CommandLineOptions.ParseAndRemoveBooleanParameter(argsList, "--disasm-diff", out getDiffableDisasm);
-                CommandLineOptions.ParseAndRemoveBooleanParameter(argsList, "--test-interp", out testInterp);
+                CommandLineOptions.ParseAndRemoveBooleanParameter(argsList, "--interp-tc", out interpTc);
+                CommandLineOptions.ParseAndRemoveBooleanParameter(argsList, "--jit-min-opts", out jitMinOpts);
 
                 CommandLineOptions.ValidatePartitionParameters(partitionCount, partitionIndex);
             }
@@ -50,7 +52,8 @@ namespace MicroBenchmarks
                     exclusionFilterValue: exclusionFilterValue,
                     categoryExclusionFilterValue: categoryExclusionFilterValue,
                     getDiffableDisasm: getDiffableDisasm,
-                    testInterp: testInterp))
+                    interpTc: interpTc,
+                    jitMinOpts: jitMinOpts))
                 .ToExitCode();
         }
     }

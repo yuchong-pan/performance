@@ -21,6 +21,7 @@ namespace BenchmarkDotNet.Extensions
         private const string InterpreterHWIntrinsicsIsSupportedFalse = COMPlusPrefix + "InterpreterHWIntrinsicsIsSupportedFalse";
         private const string InterpreterDoLoopMethods                = COMPlusPrefix + "InterpreterDoLoopMethods";
         private const string InterpreterPrintPostMortem              = COMPlusPrefix + "InterpreterPrintPostMortem";
+        private const string JitMinOpts                              = COMPlusPrefix + "JitMinOpts";
 
         public static IConfig Create(
             DirectoryInfo artifactsPath,
@@ -31,7 +32,8 @@ namespace BenchmarkDotNet.Extensions
             List<string> categoryExclusionFilterValue = null,
             Job job = null,
             bool getDiffableDisasm = false,
-            bool testInterp = false)
+            bool interpTc = false,
+            bool jitMinOpts = false)
         {
             if (job is null)
             {
@@ -46,7 +48,7 @@ namespace BenchmarkDotNet.Extensions
                 job = job.WithArguments(new Argument[] { new MsBuildArgument("/p:DebugType=portable") });
             }
             
-            if (testInterp)
+            if (interpTc)
             {
                 job = job
                 .WithEnvironmentVariables(
@@ -59,6 +61,14 @@ namespace BenchmarkDotNet.Extensions
                     new EnvironmentVariable(InterpreterPrintPostMortem, "1")
                 )
                 .WithId("Interpreter Tiered Compilation");
+            }
+            else if (jitMinOpts)
+            {
+                job = job
+                .WithEnvironmentVariables(
+                    new EnvironmentVariable(JitMinOpts, "1")
+                )
+                .WithId("JIT Min Opts");
             }
             else
             {
