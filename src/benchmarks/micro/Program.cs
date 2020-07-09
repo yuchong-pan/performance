@@ -24,6 +24,7 @@ namespace MicroBenchmarks
             bool interpTc;
             bool jitMinOpts;
             bool interpOnly;
+            bool tier1Only;
 
             // Parse and remove any additional parameters that we need that aren't part of BDN
             try {
@@ -35,10 +36,11 @@ namespace MicroBenchmarks
                 CommandLineOptions.ParseAndRemoveBooleanParameter(argsList, "--interp-tc", out interpTc);
                 CommandLineOptions.ParseAndRemoveBooleanParameter(argsList, "--jit-min-opts", out jitMinOpts);
                 CommandLineOptions.ParseAndRemoveBooleanParameter(argsList, "--interp-only", out interpOnly);
+                CommandLineOptions.ParseAndRemoveBooleanParameter(argsList, "--tier1-only", out tier1Only);
 
-                if (Convert.ToInt32(interpTc) + Convert.ToInt32(jitMinOpts) + Convert.ToInt32(interpOnly) > 1)
+                if (Convert.ToInt32(interpTc) + Convert.ToInt32(jitMinOpts) + Convert.ToInt32(interpOnly) + Convert.ToInt32(tier1Only) > 1)
                 {
-                    throw new ArgumentException("Specify one of --interp-tc, --jit-min-opts, and --interp-only.");
+                    throw new ArgumentException("Specify exactly one of --interp-tc, --jit-min-opts, --interp-only, and --tier1-only.");
                 }
 
                 CommandLineOptions.ValidatePartitionParameters(partitionCount, partitionIndex);
@@ -61,7 +63,8 @@ namespace MicroBenchmarks
                     getDiffableDisasm: getDiffableDisasm,
                     interpTc: interpTc,
                     jitMinOpts: jitMinOpts,
-                    interpOnly: interpOnly))
+                    interpOnly: interpOnly,
+                    tier1Only: tier1Only))
                 .ToExitCode();
         }
     }

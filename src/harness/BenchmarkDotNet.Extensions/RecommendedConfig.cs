@@ -35,7 +35,8 @@ namespace BenchmarkDotNet.Extensions
             bool getDiffableDisasm = false,
             bool interpTc = false,
             bool jitMinOpts = false,
-            bool interpOnly = false)
+            bool interpOnly = false,
+            bool tier1Only = false)
         {
             if (job is null)
             {
@@ -86,6 +87,16 @@ namespace BenchmarkDotNet.Extensions
                     new EnvironmentVariable(ForceInterpreter, "1")
                 )
                 .WithId("Interpreter Only");
+            }
+            else if (tier1Only)
+            {
+                job = job
+                .WithEnvironmentVariables(
+                    new EnvironmentVariable(TC_CallCountThreshold, "9999999"),
+                    new EnvironmentVariable(TieredCompilation, "0"),
+                    new EnvironmentVariable(JitMinOpts, "0")
+                )
+                .WithId("Tier 1 Only");
             }
             else
             {
