@@ -25,6 +25,7 @@ namespace MicroBenchmarks
             bool jitMinOpts;
             bool interpOnly;
             bool tier1Only;
+            int? tcThreshold;
 
             // Parse and remove any additional parameters that we need that aren't part of BDN
             try {
@@ -32,6 +33,7 @@ namespace MicroBenchmarks
                 argsList = CommandLineOptions.ParseAndRemoveIntParameter(argsList, "--partition-index", out partitionIndex);
                 argsList = CommandLineOptions.ParseAndRemoveStringsParameter(argsList, "--exclusion-filter", out exclusionFilterValue);
                 argsList = CommandLineOptions.ParseAndRemoveStringsParameter(argsList, "--category-exclusion-filter", out categoryExclusionFilterValue);
+                argsList = CommandLineOptions.ParseAndRemoveIntParameter(argsList, "--tc-threshold", out tcThreshold);
                 CommandLineOptions.ParseAndRemoveBooleanParameter(argsList, "--disasm-diff", out getDiffableDisasm);
                 CommandLineOptions.ParseAndRemoveBooleanParameter(argsList, "--interp-tc", out interpTc);
                 CommandLineOptions.ParseAndRemoveBooleanParameter(argsList, "--jit-min-opts", out jitMinOpts);
@@ -41,6 +43,11 @@ namespace MicroBenchmarks
                 if (Convert.ToInt32(interpTc) + Convert.ToInt32(jitMinOpts) + Convert.ToInt32(interpOnly) + Convert.ToInt32(tier1Only) > 1)
                 {
                     throw new ArgumentException("Specify exactly one of --interp-tc, --jit-min-opts, --interp-only, and --tier1-only.");
+                }
+
+                if (tcThreshold.HasValue && (jitMinOpts || interpOnly || tier1Only))
+                {
+                    throw new ArgumentException("--tc-threshold is only available for --interp-tc and for the default configuraiton.");
                 }
 
                 CommandLineOptions.ValidatePartitionParameters(partitionCount, partitionIndex);
@@ -64,7 +71,8 @@ namespace MicroBenchmarks
                     interpTc: interpTc,
                     jitMinOpts: jitMinOpts,
                     interpOnly: interpOnly,
-                    tier1Only: tier1Only))
+                    tier1Only: tier1Only,
+                    tcThreshold: tcThreshold))
                 .ToExitCode();
         }
     }

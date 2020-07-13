@@ -36,7 +36,8 @@ namespace BenchmarkDotNet.Extensions
             bool interpTc = false,
             bool jitMinOpts = false,
             bool interpOnly = false,
-            bool tier1Only = false)
+            bool tier1Only = false,
+            int? tcThreshold = null)
         {
             if (job is null)
             {
@@ -53,11 +54,13 @@ namespace BenchmarkDotNet.Extensions
             
             if (interpTc)
             {
+                string threshold = tcThreshold.HasValue ? tcThreshold.Value.ToString() : "0";
+
                 job = job
                 .WithEnvironmentVariables(
                     new EnvironmentVariable(Interpret, "*"),
-                    new EnvironmentVariable(InterpreterJITThreshold, "0"),
-                    new EnvironmentVariable(TC_CallCountThreshold, "0"),
+                    new EnvironmentVariable(InterpreterJITThreshold, threshold),
+                    new EnvironmentVariable(TC_CallCountThreshold, threshold),
                     new EnvironmentVariable(TieredCompilation, "1"),
                     new EnvironmentVariable(InterpreterHWIntrinsicsIsSupportedFalse, "1"),
                     new EnvironmentVariable(InterpreterDoLoopMethods, "1"),
@@ -97,6 +100,16 @@ namespace BenchmarkDotNet.Extensions
                     new EnvironmentVariable(JitMinOpts, "0")
                 )
                 .WithId("Tier 1 Only");
+            }
+            else if (tcThreshold.HasValue)
+            {
+                string threshold = tcThreshold.Value.ToString("x");
+
+                job = job
+                .WithEnvironmentVariables(
+                    new EnvironmentVariable(TC_CallCountThreshold, threshold)
+                )
+                .WithId($"Default Tiered Compilation with Threshold {threshold}");
             }
             else
             {
