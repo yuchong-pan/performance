@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using BenchmarkDotNet.Attributes;
 using MicroBenchmarks;
 
@@ -19,18 +20,24 @@ namespace Iterations
 
             for (i = 0; i < num_iterations; i++)
             {
-                int c = a + b;
-
-                if (c >= MOD)
-                {
-                    c -= MOD;
-                }
-
-                a = b;
-                b = c;
+                update(ref a, ref b);
             }
 
             return a;
+        }
+
+        [MethodImplAttribute(MethodImplOptions.NoInlining)]
+        private static void update(ref int a, ref int b)
+        {
+            int c = a + b;
+
+            if (c >= MOD)
+            {
+                c -= MOD;
+            }
+
+            a = b;
+            b = c;
         }
 
         [Benchmark]
