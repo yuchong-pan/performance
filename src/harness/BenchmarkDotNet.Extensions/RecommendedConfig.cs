@@ -37,6 +37,7 @@ namespace BenchmarkDotNet.Extensions
             bool jitMinOpts = false,
             bool interpOnly = false,
             bool tier1Only = false,
+            bool interpWithoutLoops = false,
             int? tcThreshold = null)
         {
             if (job is null)
@@ -100,6 +101,21 @@ namespace BenchmarkDotNet.Extensions
                     new EnvironmentVariable(JitMinOpts, "0")
                 )
                 .WithId("Tier 1 Only");
+            }
+            else if (interpWithoutLoops)
+            {
+                job = job
+                .WithEnvironmentVariables(
+                    new EnvironmentVariable(Interpret, "*"),
+                    new EnvironmentVariable(InterpreterJITThreshold, "9999999"),
+                    new EnvironmentVariable(TC_CallCountThreshold, "9999999"),
+                    new EnvironmentVariable(TieredCompilation, "0"),
+                    new EnvironmentVariable(InterpreterHWIntrinsicsIsSupportedFalse, "1"),
+                    new EnvironmentVariable(InterpreterDoLoopMethods, "0"),
+                    new EnvironmentVariable(InterpreterPrintPostMortem, "1"),
+                    new EnvironmentVariable(ForceInterpreter, "1")
+                )
+                .WithId("Interpreter Without Loops");
             }
             else if (tcThreshold.HasValue)
             {

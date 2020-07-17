@@ -25,6 +25,7 @@ namespace MicroBenchmarks
             bool jitMinOpts;
             bool interpOnly;
             bool tier1Only;
+            bool interpWithoutLoops;
             int? tcThreshold;
 
             // Parse and remove any additional parameters that we need that aren't part of BDN
@@ -39,8 +40,9 @@ namespace MicroBenchmarks
                 CommandLineOptions.ParseAndRemoveBooleanParameter(argsList, "--jit-min-opts", out jitMinOpts);
                 CommandLineOptions.ParseAndRemoveBooleanParameter(argsList, "--interp-only", out interpOnly);
                 CommandLineOptions.ParseAndRemoveBooleanParameter(argsList, "--tier1-only", out tier1Only);
+                CommandLineOptions.ParseAndRemoveBooleanParameter(argsList, "--interp-without-loops", out interpWithoutLoops);
 
-                if (Convert.ToInt32(interpTc) + Convert.ToInt32(jitMinOpts) + Convert.ToInt32(interpOnly) + Convert.ToInt32(tier1Only) > 1)
+                if (Convert.ToInt32(interpTc) + Convert.ToInt32(jitMinOpts) + Convert.ToInt32(interpOnly) + Convert.ToInt32(tier1Only) + Convert.ToInt32(interpWithoutLoops) > 1)
                 {
                     throw new ArgumentException("Specify exactly one of --interp-tc, --jit-min-opts, --interp-only, and --tier1-only.");
                 }
@@ -72,6 +74,7 @@ namespace MicroBenchmarks
                     jitMinOpts: jitMinOpts,
                     interpOnly: interpOnly,
                     tier1Only: tier1Only,
+                    interpWithoutLoops: interpWithoutLoops,
                     tcThreshold: tcThreshold))
                 .ToExitCode();
         }
