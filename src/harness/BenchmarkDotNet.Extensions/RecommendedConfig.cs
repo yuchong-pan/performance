@@ -38,6 +38,7 @@ namespace BenchmarkDotNet.Extensions
             bool interpOnly = false,
             bool tier1Only = false,
             bool interpWithoutLoops = false,
+            bool interpTcWithoutLoops = false,
             int? tcThreshold = null)
         {
             if (job is null)
@@ -116,6 +117,22 @@ namespace BenchmarkDotNet.Extensions
                     new EnvironmentVariable(ForceInterpreter, "1")
                 )
                 .WithId("Interpreter Without Loops");
+            }
+            else if (interpTcWithoutLoops)
+            {
+                string threshold = tcThreshold.HasValue ? tcThreshold.Value.ToString() : "0";
+
+                job = job
+                .WithEnvironmentVariables(
+                    new EnvironmentVariable(Interpret, "*"),
+                    new EnvironmentVariable(InterpreterJITThreshold, threshold),
+                    new EnvironmentVariable(TC_CallCountThreshold, threshold),
+                    new EnvironmentVariable(TieredCompilation, "1"),
+                    new EnvironmentVariable(InterpreterHWIntrinsicsIsSupportedFalse, "1"),
+                    new EnvironmentVariable(InterpreterDoLoopMethods, "0"),
+                    new EnvironmentVariable(InterpreterPrintPostMortem, "1")
+                )
+                .WithId("Interpreter Tiered Compilation Without Loops");
             }
             else if (tcThreshold.HasValue)
             {
