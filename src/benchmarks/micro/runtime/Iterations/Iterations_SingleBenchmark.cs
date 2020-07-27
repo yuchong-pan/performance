@@ -9,7 +9,7 @@ namespace Iterations
     {
         public const int MOD = 998244353;
 
-        [Params(65536)]
+        [Params(268435456)]
         public int N;
 
         public static int execute(int num_iterations)
